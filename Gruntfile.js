@@ -29,16 +29,10 @@ module.exports = function(grunt)
 
 		svg_spriter: {
 			all: {
-				cwd: 'icons/',
-				src: '*.svg',
-				options: {
-					names: {
-						compressedFolderSVG: 'compressed/',
-						variationsFolderSVG: 'variations/svg/',
-						variationsFolderPNG: 'variations/png/',
-						spritesFolder: 'sprites/'
-					}
-				}
+				expand: true,
+				cwd: 'icons/assets/',
+				src: ['*.svg'],
+				dest: 'icons/'
 			}
 		}
 

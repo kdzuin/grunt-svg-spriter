@@ -16,6 +16,9 @@
  *
  */
 
+//throw new Error("debug: stop");
+
+var fs = require('fs');
 var path = require('path');
 var SVGO = require('svgo');
 var eachAsync = require('each-async');
@@ -27,15 +30,22 @@ module.exports = function (grunt) {
 		grunt.log.writeln(str);
 	}
 
-	function minify(e, files, options) {
-		var svgo = new SVGO(options.compression);
+	function minify(e) {
+		var svgo = new SVGO(e.options.compression);
 		var done = e.async();
 
-		eachAsync(files, function (el, i, next) {
-			var srcPath = path.resolve(el.cwd, el.svg);
-			var srcSvg = grunt.file.read(srcPath);
 
-			log(el.svg + ' compressing...');
+		var options = e.options;
+
+		grunt.log.subhead('Compressing SVG files:');
+
+		eachAsync(e.files, function (el, i, next) {
+
+			var srcPath = el.src[0];
+			var filename = path.parse(el.src[0]).base;
+			var destPath = el.orig.dest + e.options.names.compressedFolderSVG + filename;
+
+			var srcSvg = grunt.file.read(srcPath);
 
 			svgo.optimize(srcSvg, function (result) {
 				if (result.error) {
@@ -43,10 +53,14 @@ module.exports = function (grunt) {
 					next();
 					return;
 				}
-				grunt.file.write(el.cwd + '/' + options.names.compressedFolderSVG + el.svg, result.data);
+
+				grunt.file.write(destPath, result.data);
+
+				grunt.log.writeln(srcPath + ' -> ' + destPath);
 				next();
 			});
 		}, function () {
+			grunt.log.ok('SVG files compressed');
 			done();
 		});
 	}
@@ -61,21 +75,15 @@ module.exports = function (grunt) {
 				spritesFolder: 'sprites/'
 
 			},
-			compression: {}
+			compression: {
+				mergePaths: false
+			}
 		});
-		var files = [];
+		this.options = options;
 
-		this.files.forEach(function (fset) {
-			fset.src.forEach(function (svg) {
-				files.push({
-					cwd: path.resolve(fset.cwd || ""),
-					svg: svg,
-					png: svg.replace(/\.svg$/i, '.png')
-				});
-			});
-		});
-
-		minify(this, files, options);
+		//log(JSON.stringify(this))
+		//fs.mkdir('tmp');
+		minify(this);
 
 	});
 
