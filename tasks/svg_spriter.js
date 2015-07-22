@@ -22,8 +22,33 @@ var eachAsync = require('each-async');
 
 module.exports = function (grunt) {
 
+
 	function log(str) {
 		grunt.log.writeln(str);
+	}
+
+	function minify(e, files, options) {
+		var svgo = new SVGO(options.compression);
+		var done = e.async();
+
+		eachAsync(files, function (el, i, next) {
+			var srcPath = path.resolve(el.cwd, el.svg);
+			var srcSvg = grunt.file.read(srcPath);
+
+			log(el.svg + ' compressing...');
+
+			svgo.optimize(srcSvg, function (result) {
+				if (result.error) {
+					grunt.warn('Error parsing SVG:', result.error);
+					next();
+					return;
+				}
+				grunt.file.write(el.cwd + '/' + options.names.compressedFolderSVG + el.svg, result.data);
+				next();
+			});
+		}, function () {
+			done();
+		});
 	}
 
 	grunt.registerMultiTask('svg_spriter', 'Makes SVG sprites and PNG sprites from collection of SVG files', function () {
@@ -40,10 +65,8 @@ module.exports = function (grunt) {
 		});
 		var files = [];
 
-		this.files.forEach(function(fset)
-		{
-			fset.src.forEach(function(svg)
-			{
+		this.files.forEach(function (fset) {
+			fset.src.forEach(function (svg) {
 				files.push({
 					cwd: path.resolve(fset.cwd || ""),
 					svg: svg,
@@ -51,6 +74,8 @@ module.exports = function (grunt) {
 				});
 			});
 		});
+
+		minify(this, files, options);
 
 	});
 
