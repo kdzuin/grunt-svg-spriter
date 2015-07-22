@@ -1,0 +1,39 @@
+/**
+ * grunt-svg-spriter
+ *
+ * Copyright (c) 2015 Konstantin Dzuin
+ * Licensed under The MIT License (MIT)
+ */
+
+
+'use strict';
+
+module.exports = function(grunt)
+{
+
+	grunt.initConfig({
+
+		jshint: {
+			all: [
+				'Gruntfile.js',
+				'tasks/**/*.js'
+			],
+			options: {
+				jshintrc: '.jshintrc'
+			}
+		},
+
+		clean: {
+			tests: ['test/**/*.png']
+		}
+
+	});
+
+	grunt.loadTasks('tasks');
+
+	grunt.loadNpmTasks('grunt-contrib-jshint');
+	grunt.loadNpmTasks('grunt-contrib-clean');
+
+	grunt.registerTask('default', ['jshint']);
+
+};

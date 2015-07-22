@@ -1,0 +1,32 @@
+{
+  "name": "grunt-svg-spriter",
+  "version": "0.1.0",
+  "description": "Creates svg sprite in symbols and creates png fallback",
+
+  "dependencies": {
+    "phantomjs": "^1.9.0"
+  },
+  "devDevendencies": {
+    "grunt": "^0.4.0",
+    "grunt-contrib-jshint": "^0.2.0",
+    "grunt-contrib-nodeunit": "^0.1.2",
+    "grunt-contrib-clean": "^0.4.0",
+    "pngjs": "^0.4.0"
+  },
+
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "svg",
+    "png",
+    "sprite",
+    "rasterize"
+  ],
+  "author": {
+    "name": "Konstantin Dzuin",
+    "email": "kdzuin@gmail.com",
+    "url": "http://kdzuin.ru/"
+  },
+  "license": "MIT"
+}
