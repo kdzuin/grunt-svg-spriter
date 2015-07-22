@@ -1,8 +1,7 @@
 {
   "name": "grunt-svg-spriter",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Creates svg sprite in symbols and creates png fallback",
-
   "dependencies": {
     "svgo": "^0.5.0",
     "each-async": "^1.0.0"
