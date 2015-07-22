@@ -12,10 +12,10 @@
     "grunt-contrib-jshint": "^0.2.0",
     "grunt-contrib-clean": "^0.4.0"
   },
-  "files": [
-    "tasks",
-    "icons"
-  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kdzuin/grunt-svg-spriter"
+  },
   "keywords": [
     "svg",
     "png",
