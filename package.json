@@ -4,14 +4,13 @@
   "description": "Creates svg sprite in symbols and creates png fallback",
 
   "dependencies": {
-    "phantomjs": "^1.9.0"
+    "svgo": "^0.5.0",
+    "each-async": "^1.0.0"
   },
-  "devDevendencies": {
+  "devDependencies": {
     "grunt": "^0.4.0",
     "grunt-contrib-jshint": "^0.2.0",
-    "grunt-contrib-nodeunit": "^0.1.2",
-    "grunt-contrib-clean": "^0.4.0",
-    "pngjs": "^0.4.0"
+    "grunt-contrib-clean": "^0.4.0"
   },
 
   "scripts": {

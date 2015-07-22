@@ -25,6 +25,20 @@ module.exports = function(grunt)
 
 		clean: {
 			tests: ['test/**/*.png']
+		},
+
+		svg_spriter: {
+			all: {
+				cwd: 'icons/',
+				src: 'assets/*.svg',
+				options: {
+					names: {
+						compressedFolderSVG: 'compressed/',
+						variationsFolderSVG: 'variations/svg/',
+						variationsFolderPNG: 'variations/png/'
+					}
+				}
+			}
 		}
 
 	});
