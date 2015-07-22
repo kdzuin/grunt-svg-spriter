@@ -32,9 +32,24 @@ module.exports = function (grunt) {
 			names: {
 				compressedFolderSVG: 'compressed/',
 				variationsFolderSVG: 'variations/svg/',
-				variationsFolderPNG: 'variations/png/'
+				variationsFolderPNG: 'variations/png/',
+				spritesFolder: 'sprites/'
+
 			},
 			compression: {}
+		});
+		var files = [];
+
+		this.files.forEach(function(fset)
+		{
+			fset.src.forEach(function(svg)
+			{
+				files.push({
+					cwd: path.resolve(fset.cwd || ""),
+					svg: svg,
+					png: svg.replace(/\.svg$/i, '.png')
+				});
+			});
 		});
 
 	});
