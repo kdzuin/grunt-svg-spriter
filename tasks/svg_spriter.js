@@ -10,6 +10,7 @@
 
 /**
  *
+ * todo:
  * 1) we use phantomjs to convert svg files to png files
  * on the step of converting svg to png we should have a possibility
  * to change a collection of sizes and colors
@@ -28,21 +29,22 @@ module.exports = function (grunt) {
 		grunt.log.writeln(str);
 	}
 
+	/**
+	 * minifying svg icons with svgo
+	 * all the options are held in options.compression object
+	 * @param e - 'this' object from task
+	 */
 	function minify(e) {
 		var svgo = new SVGO(e.options.compression);
 		var done = e.async();
 
-
 		var options = e.options;
-
 		grunt.log.subhead('Compressing SVG files:');
 
 		eachAsync(e.files, function (el, i, next) {
-
 			var srcPath = el.src[0];
 			var filename = path.parse(el.src[0]).base;
 			var destPath = el.orig.dest + e.options.names.compressedFolderSVG + filename;
-
 			var srcSvg = grunt.file.read(srcPath);
 
 			svgo.optimize(srcSvg, function (result) {
