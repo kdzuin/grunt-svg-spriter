@@ -25,16 +25,27 @@ module.exports = function(grunt)
 
 		clean: {
 			icons: [
-				'icons/**/*.png',
-				'icons/compressed/*.svg'
+				'icons/compressed',
+				'icons/png'
 			]
 		},
 
 		svg_spriter: {
-			all: {
+			icons: {
 				cwd: 'icons/assets/',
 				src: ['*.svg'],
-				dest: 'icons/'
+				dest: 'icons/',
+				options: {
+					folders: {
+						compressed: 'compressed/',
+						variations: 'png/',
+						sprites: 'sprites/'
+					},
+					tasks: {
+						compress: true,
+						rasterize: true
+					}
+				}
 			}
 		}
 

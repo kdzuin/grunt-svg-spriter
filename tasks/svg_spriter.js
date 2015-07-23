@@ -7,79 +7,127 @@
 
 'use strict';
 
-
-/**
- *
- * todo:
- * 1) we use phantomjs to convert svg files to png files
- * on the step of converting svg to png we should have a possibility
- * to change a collection of sizes and colors
- *
- */
-
 var fs = require('fs');
 var path = require('path');
 var SVGO = require('svgo');
-var eachAsync = require('each-async');
+var phantomjs = require('phantomjs');
+var childprocess = require('child_process');
+var async = require('async');
+
 
 module.exports = function (grunt) {
 
-
-	function log(str) {
-		grunt.log.writeln(str);
-	}
-
-	/**
-	 * minifying svg icons with svgo
-	 * all the options are held in options.compression object
-	 * @param e - 'this' object from task
-	 */
-	function minify(e) {
-		var svgo = new SVGO(e.options.compression);
-		var done = e.async();
-
-		var options = e.options;
-		grunt.log.subhead('Compressing SVG files:');
-
-		var files = e.files[0];
-
-		eachAsync(files.src, function (filename, i, next) {
-			var srcPath = files.cwd + filename;
-			var destPath = files.dest + e.options.names.compressedFolderSVG + filename;
-			var svgContent = grunt.file.read(srcPath);
-			svgo.optimize(svgContent, function (result) {
-				if (result.error) {
-					grunt.warn('Error parsing SVG:', result.error);
-					next();
-					return;
-				}
-				grunt.file.write(destPath, result.data);
-				grunt.log.writeln(srcPath + ' -> ' + destPath);
-				next();
-			});
-		}, function () {
-			grunt.log.ok('SVG files compressed');
-			done();
-		});
-	}
-
 	grunt.registerMultiTask('svg_spriter', 'Makes SVG sprites and PNG sprites from collection of SVG files', function () {
 
+
+		var rasterize = function (done) {
+			grunt.log.subhead('Rasterizing SVG files:');
+
+			var items = Object(collection);
+			items.forEach(function(item) {
+				item.path.src = options.tasks.compress ? path.resolve(item.path.compressed) + '/' : path.resolve(item.path.src) + '/';
+				item.path.dest = path.resolve(item.path.variations) + '/';
+			});
+
+			var spawn = childprocess.spawn(
+				phantomjs.path,
+				[path.resolve(__dirname, 'lib/phantom-rasterize.js')]
+			);
+
+			spawn.stdin.write(JSON.stringify(items));
+			spawn.stdin.end();
+
+			spawn.stdout.on('data', function (buffer) {
+				try {
+					var result = JSON.parse(buffer.toString());
+					if (result.status) {
+						grunt.log.writeln(result.file.generated + ' generated');
+					}
+				} catch (e) {
+					grunt.log.error(buffer);
+					done();
+				}
+			});
+
+			spawn.on('exit', function () {
+				grunt.log.ok("Rasterization complete.");
+				done();
+			});
+		};
+
+		var compress = function (done) {
+			grunt.log.subhead('Compressing SVG files:');
+			var svgo = new SVGO(options.compression);
+			async.each(collection, function(file, callback) {
+				var src = file.path.src + file.svg;
+				var dest = file.path.compressed + file.svg;
+				var svg = grunt.file.read(src);
+				svgo.optimize(svg, function (result) {
+					if (result.error) {
+						grunt.warn('Error parsing SVG:', result.error);
+						callback();
+						return;
+					}
+					grunt.file.write(dest, result.data);
+					grunt.log.writeln(src + ' -> ' + dest);
+					callback();
+				});
+			}, function() {
+				grunt.log.ok('SVG files compressed');
+				done();
+			});
+		};
+
+		var done = this.async();
+		var skip = function (callback) {
+			callback();
+		};
+
 		var options = this.options({
-			names: {
-				compressedFolderSVG: 'compressed/',
-				variationsFolderSVG: 'variations/svg/',
-				variationsFolderPNG: 'variations/png/',
-				spritesFolder: 'sprites/'
+			folders: {
+				compressed: 'compressed/',
+				variations: 'png/',
+				sprites: ''
 			},
 			compression: {
 				mergePaths: false
+			},
+			tasks: {
+				compress: true,
+				rasterize: true
 			}
 		});
-		this.options = options;
 
-		minify(this);
+		var collection = [];
+
+		var files = this.files[0];
+		files.src.forEach(function (filename) {
+			var data = {
+				path: {
+					src: files.cwd,
+					dest: files.dest + options.folders.sprites,
+					compressed: files.dest + options.folders.compressed,
+					variations: files.dest + options.folders.variations
+				},
+				svg: filename,
+				png: filename.replace(/\.svg$/i, '.png')
+			};
+			collection.push(data);
+		});
+
+		//grunt.log.subhead('Files collection:');
+		//grunt.log.writeln(JSON.stringify(collection, null, 2));
+
+		async.series(
+			[
+				options.tasks.compress ? compress : skip,
+				options.tasks.rasterize ? rasterize : skip
+			],
+			function () {
+				grunt.log.subhead('Done');
+				done();
+			}
+		);
 
 	});
-
 };
