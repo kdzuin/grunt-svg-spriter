@@ -41,21 +41,19 @@ module.exports = function (grunt) {
 		var options = e.options;
 		grunt.log.subhead('Compressing SVG files:');
 
-		eachAsync(e.files, function (el, i, next) {
-			var srcPath = el.src[0];
-			var filename = path.parse(el.src[0]).base;
-			var destPath = el.orig.dest + e.options.names.compressedFolderSVG + filename;
-			var srcSvg = grunt.file.read(srcPath);
+		var files = e.files[0];
 
-			svgo.optimize(srcSvg, function (result) {
+		eachAsync(files.src, function (filename, i, next) {
+			var srcPath = files.cwd + filename;
+			var destPath = files.dest + e.options.names.compressedFolderSVG + filename;
+			var svgContent = grunt.file.read(srcPath);
+			svgo.optimize(svgContent, function (result) {
 				if (result.error) {
 					grunt.warn('Error parsing SVG:', result.error);
 					next();
 					return;
 				}
-
 				grunt.file.write(destPath, result.data);
-
 				grunt.log.writeln(srcPath + ' -> ' + destPath);
 				next();
 			});
@@ -73,7 +71,6 @@ module.exports = function (grunt) {
 				variationsFolderSVG: 'variations/svg/',
 				variationsFolderPNG: 'variations/png/',
 				spritesFolder: 'sprites/'
-
 			},
 			compression: {
 				mergePaths: false

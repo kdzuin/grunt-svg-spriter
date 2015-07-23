@@ -24,12 +24,14 @@ module.exports = function(grunt)
 		},
 
 		clean: {
-			tests: ['test/**/*.png']
+			icons: [
+				'icons/**/*.png',
+				'icons/compressed/*.svg'
+			]
 		},
 
 		svg_spriter: {
 			all: {
-				expand: true,
 				cwd: 'icons/assets/',
 				src: ['*.svg'],
 				dest: 'icons/'
@@ -43,6 +45,6 @@ module.exports = function(grunt)
 	grunt.loadNpmTasks('grunt-contrib-jshint');
 	grunt.loadNpmTasks('grunt-contrib-clean');
 
-	grunt.registerTask('default', ['jshint']);
+	grunt.registerTask('default', ['clean', 'jshint', 'svg_spriter']);
 
 };

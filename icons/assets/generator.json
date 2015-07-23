@@ -1,0 +1,40 @@
+{
+  "classPrefix": "icon--",
+  "sizes": [
+    {
+      "name": "xsm",
+      "suffix": "--xsm",
+      "width": 16,
+      "height": 16
+    },
+    {
+      "name": "sm",
+      "suffix": "--sm",
+      "width": 24,
+      "height": 24
+    },
+    {
+      "name": "default",
+      "suffix": "",
+      "width": 32,
+      "height": 32
+    }
+  ],
+  "colors": [
+    {
+      "name": "default",
+      "suffix": "",
+      "color": "#333"
+    },
+    {
+      "name": "blue",
+      "suffix": "--blue",
+      "color": "#12b"
+    },
+    {
+      "name": "white",
+      "suffix": "--white",
+      "color": "#fff"
+    }
+  ]
+}
