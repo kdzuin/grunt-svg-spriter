@@ -16,8 +16,6 @@
  *
  */
 
-//throw new Error("debug: stop");
-
 var fs = require('fs');
 var path = require('path');
 var SVGO = require('svgo');
@@ -81,8 +79,6 @@ module.exports = function (grunt) {
 		});
 		this.options = options;
 
-		//log(JSON.stringify(this))
-		//fs.mkdir('tmp');
 		minify(this);
 
 	});
