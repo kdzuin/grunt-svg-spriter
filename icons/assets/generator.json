@@ -1,15 +1,17 @@
 {
-  "classPrefix": "icon--",
+  "prefix": "icon",
+  "delimiter": "--",
+  "defaultColor": "#333",
   "sizes": [
     {
       "name": "xsm",
-      "suffix": "--xsm",
+      "suffix": "xsm",
       "width": 16,
       "height": 16
     },
     {
       "name": "sm",
-      "suffix": "--sm",
+      "suffix": "sm",
       "width": 24,
       "height": 24
     },
@@ -18,23 +20,6 @@
       "suffix": "",
       "width": 32,
       "height": 32
-    }
-  ],
-  "colors": [
-    {
-      "name": "default",
-      "suffix": "",
-      "color": "#333"
-    },
-    {
-      "name": "blue",
-      "suffix": "--blue",
-      "color": "#12b"
-    },
-    {
-      "name": "white",
-      "suffix": "--white",
-      "color": "#fff"
     }
   ]
 }

@@ -1,10 +1,10 @@
 var fs = require('fs'),
 	system = require('system'),
-	page = require('webpage').create(),
 	items = JSON.parse(system.stdin.read()),
+	async = require('async'),
 	total = items.length,
 	next = 0,
-	file, svgdata, frag, svg, width, height;
+	file;
 
 
 var nextFile = function () {
@@ -20,38 +20,72 @@ var nextFile = function () {
 	var src = item.path.src + item.svg;
 	var dest = item.path.dest + item.png;
 
-	svgdata = fs.read(src) || '';
 
-	frag = window.document.createElement('div');
-	frag.innerHTML = svgdata;
+	if (typeof(item.collection.sizes) === 'object') {
 
-	svg = frag.querySelector('svg');
+		var sizes = item.collection.sizes;
 
-	width = svg.getAttribute('width');
-	height = svg.getAttribute('height');
-	if (!width && !height) {
-		var viewbox = svg.getAttribute('viewBox');
-		var dimensions = viewbox.split(' ');
-		width = dimensions[2] - dimensions[0];
-		height = dimensions[3] - dimensions[1];
+		var nextSize = 0;
+		var totalSize = sizes.length;
+
+		var nextSizeRasterize = function () {
+			var size;
+
+			if (nextSize >= totalSize) {
+				nextFile();
+				return;
+			}
+
+			size = sizes[nextSize++];
+
+			var page = require('webpage').create();
+			dest = item.path.dest + size.name + '/' + item.png;
+
+			page.viewportSize = {
+				width: parseFloat(size.width),
+				height: parseFloat(size.height)
+			};
+
+			page.open(src, function(status) {
+				page.render(dest);
+				console.log(JSON.stringify({ 'file': item.path.variations + size.name + '/' + item.png , 'status': status}));
+				page.close();
+				nextSizeRasterize();
+			});
+		};
+
+		nextSizeRasterize();
+
+
+	} else {
+
+		var svgdata = fs.read(src) || '';
+		var frag = window.document.createElement('div');
+		frag.innerHTML = svgdata;
+		var svg = frag.querySelector('svg');
+
+		var width = svg.getAttribute('width');
+		var height = svg.getAttribute('height');
+		if (!width && !height) {
+			var viewbox = svg.getAttribute('viewBox');
+			var dimensions = viewbox.split(' ');
+			width = dimensions[2] - dimensions[0];
+			height = dimensions[3] - dimensions[1];
+		}
+
+		var page = require('webpage').create();
+		page.viewportSize = {
+			width: parseFloat(width),
+			height: parseFloat(height)
+		};
+		page.open(src, function(status) {
+			page.render(dest);
+			console.log(JSON.stringify({ 'file': item.path.variations + item.png, 'status': status }));
+			nextFile();
+		});
+
 	}
-	page.viewportSize = {
-		width: parseFloat(width),
-		height: parseFloat(height)
-	};
 
-
-	item.folder = item.path.variations;
-	item.generated = item.folder + item.png;
-
-	page.open(src, function (status) {
-		//page.evaluate(function(){
-		//	document.querySelector('svg').style.fill = '#12f';
-		//});
-		page.render(dest);
-		console.log(JSON.stringify({ 'file': item, 'status': status }));
-		nextFile();
-	});
 
 };
 

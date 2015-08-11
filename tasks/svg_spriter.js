@@ -25,8 +25,19 @@ module.exports = function (grunt) {
 
 			var items = Object(collection);
 			items.forEach(function(item) {
+				var collection = {};
+
+				try {
+					collection = JSON.parse(grunt.file.read(path.resolve(item.path.src + 'generator.json')));
+				} catch (e) {
+					collection.prefix = 'icon';
+					collection.delimiter = '--';
+				}
+
 				item.path.src = options.tasks.compress ? path.resolve(item.path.compressed) + '/' : path.resolve(item.path.src) + '/';
 				item.path.dest = path.resolve(item.path.variations) + '/';
+				item.collection = collection;
+
 			});
 
 			var spawn = childprocess.spawn(
@@ -41,11 +52,10 @@ module.exports = function (grunt) {
 				try {
 					var result = JSON.parse(buffer.toString());
 					if (result.status) {
-						grunt.log.writeln(result.file.generated + ' generated');
+						grunt.log.writeln(result.file + ' generated');
 					}
 				} catch (e) {
 					grunt.log.error(buffer);
-					done();
 				}
 			});
 
