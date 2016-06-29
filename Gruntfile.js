@@ -41,9 +41,11 @@ module.exports = function(grunt)
 						variations: 'png/',
 						sprites: 'sprites/'
 					},
-					tasks: {
-						compress: true,
-						rasterize: true
+					compression: {
+						plugins: [
+							{removeTitle: true},
+							{removeDimensions: true}
+						]
 					}
 				}
 			}

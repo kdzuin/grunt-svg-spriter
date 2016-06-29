@@ -17,27 +17,28 @@ var async = require('async');
 
 module.exports = function (grunt) {
 
-	grunt.registerMultiTask('svg_spriter', 'Makes SVG sprites and PNG sprites from collection of SVG files', function () {
+	grunt.registerMultiTask('svg_spriter', 'Makes SVG sprites and PNG fallbacks from collection of SVG files', function () {
 
+		var getCollection = function (item) {
+			var collection = {};
+
+			try {
+				collection = JSON.parse(grunt.file.read(path.resolve(item.path.src + 'generator.json')));
+			} catch (e) {
+				collection = {};
+			}
+			return collection;
+		};
 
 		var rasterize = function (done) {
 			grunt.log.subhead('Rasterizing SVG files:');
 
 			var items = Object(collection);
 			items.forEach(function(item) {
-				var collection = {};
-
-				try {
-					collection = JSON.parse(grunt.file.read(path.resolve(item.path.src + 'generator.json')));
-				} catch (e) {
-					collection.prefix = 'icon';
-					collection.delimiter = '--';
-				}
-
+				var collection = getCollection(item);
 				item.path.src = options.tasks.compress ? path.resolve(item.path.compressed) + '/' : path.resolve(item.path.src) + '/';
 				item.path.dest = path.resolve(item.path.variations) + '/';
 				item.collection = collection;
-
 			});
 
 			var spawn = childprocess.spawn(
@@ -65,7 +66,7 @@ module.exports = function (grunt) {
 			});
 		};
 
-		var compress = function (done) {
+		var compress = function (done, again) {
 			grunt.log.subhead('Compressing SVG files:');
 			var svgo = new SVGO(options.compression);
 			async.each(collection, function(file, callback) {
@@ -83,9 +84,14 @@ module.exports = function (grunt) {
 					callback();
 				});
 			}, function() {
-				grunt.log.ok('SVG files compressed');
-				done();
+				if (again) {
+					grunt.log.ok('SVG files compressed');
+					done();
+				} else {
+					compress(done, true);
+				}
 			});
+
 		};
 
 		var done = this.async();
@@ -96,11 +102,13 @@ module.exports = function (grunt) {
 		var options = this.options({
 			folders: {
 				compressed: 'compressed/',
-				variations: 'png/',
-				sprites: ''
+				variations: 'png/'
 			},
 			compression: {
-				mergePaths: false
+				plugins: [
+					{removeTitle: true},
+					{removeDimensions: true}
+				]
 			},
 			tasks: {
 				compress: true,
@@ -115,7 +123,6 @@ module.exports = function (grunt) {
 			var data = {
 				path: {
 					src: files.cwd,
-					dest: files.dest + options.folders.sprites,
 					compressed: files.dest + options.folders.compressed,
 					variations: files.dest + options.folders.variations
 				},
